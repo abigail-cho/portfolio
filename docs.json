@@ -50,18 +50,24 @@
             "tab": "API and Developer Documentation",
             "groups": [
               {
-                "group": "API Documentation",
+                "group": "SDK documentation",
                 "pages": [
                   "api-reference/introduction"
                 ]
               },
               {
-                "group": "Endpoint Examples",
+                "group": "API documentation",
                 "pages": [
                   "api-reference/endpoint/get",
                   "api-reference/endpoint/create",
                   "api-reference/endpoint/delete",
                   "api-reference/endpoint/webhook"
+                ]
+              },
+              {
+                "group": "Other developer documentation",
+                "pages":[
+                  "api-reference/authenticating-api-calls"
                 ]
               }
             ]
