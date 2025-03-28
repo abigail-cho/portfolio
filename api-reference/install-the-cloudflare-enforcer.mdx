@@ -1,0 +1,355 @@
+---
+id: install-the-cloudflare-enforcer
+title: Install the Cloudflare Enforcer
+sidebar_label: Install the Cloudflare Enforcer
+description: An article instructing how to install a proprietary Enforcer with a Cloudflare Worker on a user's CDN
+toc_max_heading_level: 4
+tags: [Developer, Task]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## About this article 
+
+A procedural article describing how to install the company’s proprietary code on the reader’s server using a Cloudflare Worker. This installation was required to use this company’s more popular products, but often, the person installing this code was not an expert developer. This proved to be a significant barrier to entry and a friction point during onboarding, especially because the early versions of this article were mostly full of technical jargon and did not have clear prerequisites.
+
+I chose to include this article because it showcases more technical instructions, but it also demonstrates the expertise of the audience I was writing for. This audience had some experience with command-line interfaces, for example, but not as much with Cloudflare or installing certain programs. Therefore, I presented the information as clearly and succinctly as possible, and I warned readers at steps where past users stumbled.
+
+This article is available publicly, so nothing has been redacted in the sample. You can view the current version [on their site.](https://edocs.humansecurity.com/docs/install-the-cloudflare-enforcer)
+
+<hr></hr>
+
+## Install the Cloudflare Enforcer
+
+If your organization uses **Cloudflare,** you can use HUMAN’s Cloudflare **Enforcer** to protect against malicious behavior. The Cloudflare Enforcer is installed using a Cloudflare **Worker,** or a snippet of code, and is deployed to your content delivery network (CDN). The Enforcer dictates how traffic should be handled per your organization’s standards.
+
+You can learn how to install the Cloudflare Enforcer with this article.
+
+### Prerequisites
+
+* A **Cloudflare account.** You can sign up for an account from [Cloudflare's website.](https://www.cloudflare.com/)
+* A **command-line interface (CLI).**
+* A text editor.
+* **Node Version Manager (nvm)** installed on your device. See nvm's [GitHub repository](about://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) to troubleshoot installation issues.
+* The latest version of **Node.js.** After installing nvm, enter `nvm install stable` in your CLI to install it.
+* **Wrangler** installed on your device. You can enter `npm install -g wrangler` in your CLI to install it.
+* Your unique HUMAN information: 
+    * Your **Application ID.** You can find this under **Platform Settings > Applications > Overview** in the HUMAN console.
+    * Your **Server Token.** You can find this under **Platform Settings > Applications > Status & Settings > Server Token.** 
+    * Your **Risk Cookie Key.** You can find this under **Bot Defender > Policies > Policy Settings > Policy Information.** 
+
+### Installation
+
+There are three parts to the Cloudflare Enforcer installation: 
+
+1. [Create the Cloudflare Worker](#create-the-cloudflare-worker)
+2. [Install the HUMAN Enforcer](#install-the-human-enforcer)
+3. [Set up remote configuration](#set-up-remote-configuration)
+
+The majority of the installation process is done through a CLI.
+
+#### Create the Cloudflare Worker
+
+1. Enter `npm create cloudflare@latest`.
+2. When prompted, enter a folder name to create your Worker in. In the example below, we've named our folder `human-cloudflare-enforcer`. 
+
+```markup
+npm create cloudflare@latest 
+
+using create-cloudflare version 2.21.X
+╭ Create an application with Cloudflare Step 1 of 3
+│ 
+╰ In which directory do you want to create your application? also used as application name
+  ./human-cloudflare-enforcer
+```
+
+3. When prompted, select the `"Hello World" Worker` option and hit `return` to proceed.
+
+```markup
+│ dir ./cloudflare-enforcer
+│
+╰ What type of application do you want to create?
+  ● "Hello World" Worker
+  ○ "Hello World" Worker (Python)
+  ○ "Hello World" Durable Object
+  ○ Website or web app
+  ○ Example router & proxy Worker
+  ○ Scheduled Worker (Cron Trigger)
+  ○ Queue consumer & producer Worker
+  ○ API starter (OpenAPI compliant)
+  ○ Worker built from a template hosted in a git repository
+```
+
+4. Select whether to install the Worker using TypeScript. By default, the Worker will install in JavaScript.
+
+:::warning[Note]
+Whether you use TypeScript or JavaScript is up to you, but be sure to **remember what you chose.** Later in the installation, you will need to choose the code snippet that corresponds to the language you installed in.
+:::
+
+```markup
+├ What type of application do you want to create?
+│ type "Hello World" Worker
+│
+╰ Do you want to use TypeScript?
+  Yes / No
+```
+
+5. When prompted, select `No` to deploying your application.
+
+```markup
+╭ Deploy with Cloudflare Step 3 of 3
+│
+╰ Do you want to deploy your application?
+  Yes / No
+```
+
+Afterwards, you should receive a success message that reads `APPLICATION CREATED`. This means you created a basic Cloudflare Worker, and you're ready to move on to installing the HUMAN Enforcer.
+
+#### Install the HUMAN Enforcer
+
+1. In your CLI, enter `cd folder_name` to open the folder you created in **Create the Cloudflare Worker, Step 2.** Based on our earlier example, we would enter `cd human-cloudflare-enforcer`.
+2. Enter `npm i --save @humansecurity/cloudflare-enforcer`. This will install the latest Cloudflare Enforcer from HUMAN.
+3. Enter `cd src`. 
+4. In your preferred text editor, open either `index.ts` or `index.js` depending on your choice in **Create the Cloudflare Worker, Step 4.** The `.ts` file is for TypeScript installations, while `.js` is for JavaScript.
+
+:::info[Note]
+You can check the file type you have by entering `ls` while inside the `src` folder. This will show you your `index` file's type.
+:::
+
+5. Delete all the code currently in the `index` file. The following snippet shows all the default code you should **delete.**
+
+```markup
+/**
+ * Welcome to Cloudflare Workers! This is your first worker.
+ *
+ * - Run `npm run dev` in your terminal to start a development server
+ * - Open a browser tab at http://localhost:8787/ to see your worker in action
+ * - Run `npm run deploy` to publish your worker
+ *
+ * Learn more at https://developers.cloudflare.com/workers/
+ */
+export default {
+        async fetch(request, env, ctx) {
+                return new Response('Hello World!');
+        },
+};
+```
+
+6. Copy the appropriate code snippet, either TypeScript or JavaScript, from below and paste it into your `index` file.
+
+:::info[Note]
+In addition to choosing between TypeScript and JavaScript, you must also make sure to pick the right type of Worker. This can either be an ES Module or Service Module, and it depends on your Cloudflare configuration. You can see some examples from both Workers in [Cloudflare's documentation.](https://developers.cloudflare.com/workers/reference/migrate-to-module-workers/)
+:::
+
+<Tabs>
+  <TabItem value="es-js" label="ES Modules Syntax: JavaScript" default>
+    ```js
+    import {
+        HumanSecurityEnforcer
+    } from "@humansecurity/cloudflare-enforcer";
+
+    const config = {
+        px_app_id: '<APP_ID>',
+        px_auth_token: '<AUTH_TOKEN>',
+        px_cookie_secret: '<COOKIE_SECRET>',
+        // ...
+    };
+
+    export default {
+        async fetch(request, env, ctx) {
+            // create a new enforcer
+            const enforcer = await HumanSecurityEnforcer.initialize(config, env);
+
+            // call enforce
+            const retVal = await enforcer.enforce(ctx, request);
+
+            // if enforce returned a response, return that response
+            if (retVal instanceof Response) {
+                return retVal;
+            }
+
+            // retrieve the resource from the cache or origin server
+            // make sure to use the value returned from enforce
+            const response = await fetch(retVal);
+
+            // call postEnforce and return the resulting response
+            return await enforcer.postEnforce(ctx, response);
+        },
+    };
+    ```
+  </TabItem>
+  <TabItem value="es-ts" label="ES Modules Syntax: TypeScript" default>
+    ```ts
+    import {
+        HumanSecurityEnforcer,
+        HumanSecurityConfiguration
+    } from '@humansecurity/cloudflare-enforcer';
+
+    const config: HumanSecurityConfiguration = {
+        px_app_id: '<APP_ID>',
+        px_auth_token: '<AUTH_TOKEN>',
+        px_cookie_secret: '<COOKIE_SECRET>',
+        // ...
+    };
+
+    interface Env {
+        // If using Human Security features that require the PXKV Namespace
+        PXKV: KVNamespace;
+    }
+
+    export default {
+        async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise < Response > {
+            // create a new enforcer
+            const enforcer = await HumanSecurityEnforcer.initialize(config, env);
+
+            // call enforce
+            const retVal = await enforcer.enforce(ctx, request);
+
+            // if enforce returned a response, return that response
+            if (retVal instanceof Response) {
+                return retVal;
+            }
+
+            // retrieve the resource from the cache or origin server
+            // make sure to use the value returned from enforce
+            const response = await fetch(retVal);
+
+            // call postEnforce and return the resulting response
+            return await enforcer.postEnforce(ctx, response);
+        },
+    };
+    ```
+  </TabItem>
+  <TabItem value="sw-js" label="Service Worker Syntax: JavaScript" default>
+    ```js
+    import {
+        HumanSecurityEnforcer
+    } from '@humansecurity/cloudflare-enforcer';
+
+    // define an enforcer configuration however you see fit
+    const config = {
+        px_app_id: '<APP_ID>',
+        px_auth_token: '<AUTH_TOKEN>',
+        px_cookie_secret: '<COOKIE_SECRET>',
+        // ...
+    };
+
+    async function handleEvent(event) {
+        // provide the enforcer configuration as an argument and await the returned Promise
+        // to receive an instance of the HumanSecurityEnforcer
+        const enforcer = await HumanSecurityEnforcer.initialize(config);
+
+        // call enforce
+        const retVal = await enforcer.enforce(event);
+
+        // if enforce returned a response, return that response
+        if (retVal instanceof Response) {
+            return retVal;
+        }
+
+        // retrieve the resource from the cache or origin server
+        // make sure to use the value returned from enforce
+        const response = await fetch(retVal);
+
+        // call postEnforce and return the resulting response
+        return await enforcer.postEnforce(event, response);
+    }
+
+    addEventListener('fetch', (event) => {
+        event.respondWith(handleEvent(event));
+    });
+    ```
+  </TabItem>
+  <TabItem value="sw-ts" label="Service Worker Syntax: TypeScript" default>
+    ```ts
+    import {
+        HumanSecurityEnforcer,
+        HumanSecurityConfiguration
+    } from "@humansecurity/cloudflare-enforcer";
+
+    const config: HumanSecurityConfiguration = {
+        px_app_id: '<APP_ID>',
+        px_auth_token: '<AUTH_TOKEN>',
+        px_cookie_secret: '<COOKIE_SECRET>',
+        // ...
+    };
+
+    async function handleEvent(event: FetchEvent): Promise < Response > {
+        // create a new enforcer
+        const enforcer = await HumanSecurityEnforcer.initialize(config);
+
+        // call enforce
+        const retVal = await enforcer.enforce(event);
+
+        // if enforce returned a response, return that response
+        if (retVal instanceof Response) {
+            return retVal;
+        }
+
+        // retrieve the resource from the cache or origin server
+        // make sure to use the value returned from enforce
+        const response = await fetch(retVal);
+
+        // call postEnforce and return the resulting response
+        return await enforcer.postEnforce(event, response);
+    }
+
+    addEventListener('fetch', (event) => {
+        event.respondWith(handleEvent(event));
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+7. Update the `px_add_id`, `px_auth_token`, and `px_cookie_secret` fields with your **Application ID, Server Token,** and **Risk Cookie Key** respectively. 
+
+:::info[Note]
+These are the **minimum** required fields that **must be completed** in order for the Enforcer to work. You can always return to this file to customize your Enforcer later with our [optional configurations.](https://edocs.humansecurity.com/docs/configuration-cloudflare)
+:::
+
+```markup
+// define an enforcer configuration however you see fit
+const config = {
+    px_app_id: '<APP_ID>',
+    px_auth_token: '<AUTH_TOKEN>',
+    px_cookie_secret: '<COOKIE_SECRET>',
+    // ...
+};
+```
+
+8. Save and close the file.
+9. Enter `npx wrangler deploy` to deploy your Worker. You may be prompted to log in to your Wrangler or Cloudflare account.
+10. Navigate to your Cloudflare dashboard and open **Workers & Pages.** Your new Worker with the HUMAN Enforcer should appear with the same name you gave it in **Create the Cloudflare Worker, Step 2.** In our case, the Worker is named **human-cloudflare-enforcer.**
+11. Select the **Worker,** then select **Settings > Triggers > Add route** under **Routes.** This is where you can add URL routes and zones to monitor with the Cloudflare Enforcer. We recommend protecting your full domain, including all pages on your domain, with the pattern `subdomain.apex.com/*`. For example, to protect the full domain of a site with the URL `www.example.com`, you should provide the following fields: 
+  * **Route:** `www.example.com/*`
+  * **Zone:** `example.com`
+
+Next, now that your Cloudflare Worker has been integrated with the Enforcer, you must set up **remote configuration fields** in your Worker.
+
+#### Set up remote configuration
+
+**Remote configuration** is a feature that lets you access and modify your Enforcer's configuration remotely without redeploying your Cloudflare Worker. This also allows the HUMAN team to troubleshoot or customize your Enforcer directly. Remote configuration is **required** as part of your Enforcer setup.
+
+:::info[Note]
+HUMAN will **never** change your Enforcer configuration without your permission. You can learn more about remote configurations with our [help article.](https://edocs.humansecurity.com/docs/configuration-cloudflare#remote-configurations)
+
+To complete the remote configuration setup, you will need to contact our team. You can reach out to your account manager or reach out to us at [contact-support@humansecurity.com](mailto:contact-support@humansecurity.com).
+:::
+
+1. In your Cloudflare dashboard's **Workers & Pages,** select the Worker you created in **Create the Cloudflare Worker, Step 2.** In our case, the Worker is named **human-cloudflare-enforcer.**
+2. Navigate to the Worker's **Settings > Variables > KV Namespace Bindings** and select **Create a KV namespace.**
+3. Select **Create a namespace** and enter a **name** for it, then select **Add.**
+4. Return to your Worker's **Settings > Variables > KV Namespace Bindings** and select **Add binding.** 
+5. Create a KV variable with the following fields:
+  * **Variable name:** Enter **PXKV**. The name **must** be set to PXKV for the remote configuration to work.
+  * **KV Namespace:** Select the Namespace you created in **Step 3.**
+6. Select **Deploy.**
+7. Navigate back to the Cloudflare **dashboard > Websites** and select the domain to trigger the Enforcer's Worker.
+8. Navigate to **Workers Routes** and select **Edit** next to the **Route** to bind your Worker to.
+9. In the **Edit route** window that appears, select the **Worker** you created from the dropdown menu and select **Save.**
+10. From the route you bound the Worker to, share the **full website address** with HUMAN's Support team. Once we receive your URL, we will complete the setup for you.
+
+Your Cloudflare Enforcer has been successfully installed with the minimum requirements to monitor activity on your Cloudflare CDN. You can further customize the Enforcer's behavior by referencing our [configuration options.](https://edocs.humansecurity.com/docs/configuration-cloudflare)
+
+Once you finish installing, be sure to contact HUMAN to complete your tuning process.

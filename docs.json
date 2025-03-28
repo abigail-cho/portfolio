@@ -1,76 +1,134 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "theme": "willow",
+  "name": "Abigail Cho Portfolio",
+  "description": "Technical writing portfolio for Abigail Cho.",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#5db0f8",
+    "light": "#A2CDF2",
+    "dark": "#8AABBF"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/notebook.png",
   "navigation": {
-    "tabs": [
+    "dropdowns": [
       {
-        "tab": "Guides",
-        "groups": [
+        "dropdown": "Portfolio",
+        "icon": "folder",
+        "tabs": [
           {
-            "group": "Get Started",
+            "tab": "Introduction",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
+              "/introduction"
             ]
           },
           {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+            "tab": "Product documentation",
+            "groups": [
+              {
+                "group": "Guides",
+                "pages": [
+                  "/product-documentation/understanding-sightline-dashboard-activity"
+                ]
+              },
+              {
+                "group": "Tutorials",
+                "pages": [
+                  "product-documentation/manually-uploading-content",
+                  "product-documentation/submitting-content-for-approval"
+                ]
+              },
+              {
+                "group": "Reference",
+                "pages": [
+                  "/product-documentation/about-attack-profiles",
+                  "/product-documentation/understanding-first-party-data"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API and Developer Documentation",
+            "groups": [
+              {
+                "group": "API Documentation",
+                "pages": [
+                  "api-reference/introduction"
+                ]
+              },
+              {
+                "group": "Endpoint Examples",
+                "pages": [
+                  "api-reference/endpoint/get",
+                  "api-reference/endpoint/create",
+                  "api-reference/endpoint/delete",
+                  "api-reference/endpoint/webhook"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
-        "groups": [
+        "dropdown": "Resume",
+        "icon": "paper",
+        "tabs": [
           {
-            "group": "API Documentation",
+          "tab": "Resume",
+          "pages": [
+            "/resume/resume"
+          ]
+          },
+          {
+            "tab": "About me",
             "pages": [
-              "api-reference/introduction"
+              "/resume/about-me"
+            ]
+          }
+        ]
+      },
+      {
+        "dropdown": "Blog",
+        "icon": "book",
+        "tabs": [
+          {
+            "tab": "2025",
+            "pages": [
+              "/blog/blog-test"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "tab": "2024",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "/blog/2024/i-love-chatspeak",
+              "/blog/2024/learning-to-say-no-but"
             ]
           }
+        ]
+      },
+      {
+        "dropdown": "Changelog",
+        "icon": "bars",
+        "pages": [
+          "/changelog"
         ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "LinkedIn",
+          "href": "https://www.linkedin.com/in/abscho/",
+          "icon": "linkedin"
         },
         {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
+          "anchor": "GitHub",
+          "href": "https://www.github.com/abigail-cho",
+          "icon": "github"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Email me",
+          "href": "mailto:abscho@gmail.com",
+          "icon": "envelope"
         }
       ]
     }
@@ -78,25 +136,5 @@
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
   }
 }
