@@ -50,12 +50,6 @@
             "tab": "API and Developer Documentation",
             "groups": [
               {
-                "group": "SDK documentation",
-                "pages": [
-                  "api-reference/introduction"
-                ]
-              },
-              {
                 "group": "API documentation",
                 "pages": [
                   "api-reference/endpoint/get",
@@ -67,6 +61,7 @@
               {
                 "group": "Other developer documentation",
                 "pages":[
+                  "api-reference/install-the-cloudflare-enforcer",
                   "api-reference/authenticating-api-calls"
                 ]
               }
