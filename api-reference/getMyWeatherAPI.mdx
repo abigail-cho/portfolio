@@ -1,19 +1,13 @@
 ---
-id: getmyweather-api
-title: GetMyWeather API
-sidebar_label: GetMyWeather API
-description: API documentation for a fictional weather API.
-toc_max_heading_level: 4
-tags: [Developer, Reference, API]
+title: 'GetMyWeather API'
+description: 'Sample end-to-end API documentation'
 ---
 
-## About this article
-
+<Accordion title="Why I included this sample">
 A sample API document written for a fake weather application, GetMyWeather. GetMyWeather is a forecast service that shows forecast information at a time and place. This application is unique because it allows users to get the weather at different levels, from a state to an individual address, with the `specificity` parameter. This document describes what the API is and how it can be used.
 
-<hr></hr>
-
-## GetMyWeather API
+I included this sample because it showcases end-to-end API documentation. This was a personal project.
+</Accordion>
 
 ### What is the GetMyWeather API? 
 
@@ -70,7 +64,7 @@ The required parameters are:
 
 ### Interpreting the Return Package
 
-GetMyWeather will return an HTML package on a successful call. Below is a sample repsonse.
+GetMyWeather will return an HTML package on a successful call. Below is a sample response.
 
 ```html
 <div class="forecast"> 
@@ -83,9 +77,9 @@ GetMyWeather will return an HTML package on a successful call. Below is a sample
 
 The return parameters are: 
 
-:::info[Note]
+<Note>
 The return package is static. To change the return parameters, you must call the API again with new input parameters.
-:::
+</Note>
 
 | Parameter | Description | Units | Other | 
 | --------- | ----------- | ----- | ----- |
