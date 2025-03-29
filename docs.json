@@ -60,15 +60,15 @@
                       "api-reference/endpoint/delete",
                       "api-reference/endpoint/webhook"
                     ]
-                  }
+                  },
+                  "api-reference/getMyWeatherAPI",
+                  "api-reference/authenticating-api-calls"
                 ]
               },
               {
                 "group": "Other developer documentation",
                 "pages":[
-                  "api-reference/install-the-cloudflare-enforcer",
-                  "api-reference/authenticating-api-calls",
-                  "api-reference/getMyWeatherAPI"
+                  "api-reference/install-the-cloudflare-enforcer"
                 ]
               }
             ]
