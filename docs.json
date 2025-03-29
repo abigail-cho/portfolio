@@ -13,7 +13,7 @@
     "dropdowns": [
       {
         "dropdown": "Portfolio",
-        "icon": "folder",
+        "icon": "folder-open",
         "tabs": [
           {
             "tab": "Introduction",
@@ -77,7 +77,7 @@
       },
       {
         "dropdown": "Resume",
-        "icon": "paper",
+        "icon": "square-user",
         "tabs": [
           {
           "tab": "Resume",
@@ -95,7 +95,7 @@
       },
       {
         "dropdown": "Blog",
-        "icon": "book",
+        "icon": "pen-clip",
         "tabs": [
           {
             "tab": "2025",
@@ -114,7 +114,7 @@
       },
       {
         "dropdown": "Changelog",
-        "icon": "bars",
+        "icon": "list-radio",
         "pages": [
           "/changelog"
         ]
@@ -125,7 +125,7 @@
         {
           "anchor": "LinkedIn",
           "href": "https://www.linkedin.com/in/abscho/",
-          "icon": "linkedin"
+          "icon": "linkedin-in"
         },
         {
           "anchor": "GitHub",
@@ -135,7 +135,7 @@
         {
           "anchor": "Email me",
           "href": "mailto:abscho@gmail.com",
-          "icon": "envelope"
+          "icon": "paper-plane"
         }
       ]
     }
