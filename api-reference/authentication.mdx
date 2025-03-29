@@ -1,0 +1,55 @@
+---
+title: "Authentication"
+description: "An article describing how to authenticate API calls for different products."
+---
+
+<Accordion title="Why I included this article">This article describes how to authenticate API calls for all of HUMAN's products. At the time, a single formal document describing how to authenticate did not exist, and to make things more confusing, the method to get an authentication token differed depending on the product you used. This wasn't intuitive for many users, especially those that used two or more products at the same time.<br /><br />I included this article because I feel it is a good example of a how-to article as well as demonstrates clear steps for different products. I had majority contribution to this article. It is [available today](https://docs.humansecurity.com/applications-and-accounts/reference/api-authentication), so I did not redact any information from this sample.</Accordion>
+
+HUMAN uses API tokens to authenticate requests. To use any of our API, you **must** authenticate every request you make. Requests without proper authentication will fail.
+
+Authorization for certain solutions are slightly different. Be sure you follow the correct instructions for the API you want to use.
+* [Getting a token for Account Defender, Bot Defender, or Credential Intelligence](#getting-a-token-for-account-defender-bot-defender-or-credential-intelligence)
+* [Getting a token for Code Defender or PCI DSS](#getting-a-token-for-code-defender-or-pci-dss)
+
+To generate a token, you must have access to the HUMAN Console.
+
+<Warning>Tokens are confidential and gives sensitive access to your account. Be sure to store and handle your tokens securely. **Do not** share this key with others or store them in publicly accessible places.</Warning>
+
+## Getting a token for Account Defender, Bot Defender, or Credential Intelligence
+
+For Account Defender, Bot Defender, or Credential Intelligence, HUMAN uses an application's **server token** when using API calls. For more on creating and managing applications, see [Setting up your application](/docs/managing-applications).
+
+To create a token:
+
+1. From the HUMAN console, navigate to **Platform Settings > Applications.**
+2. Select the application you would like to identify while using API calls.
+3. Under **Application settings**, select **Server token.**
+4. If a token doesn't already exist, select **Add server token** to generate a new one.
+5. Hover over the new token and select the **Copy** button to copy it.
+
+You can create up to three server tokens per application at a time.
+
+## Getting a token for Code Defender or PCI DSS
+
+<Note>If a token does not already exist, you may need to ask HUMAN to generate one for you. Contact us at [contact-support@humansecurity.com](mailto:contact-support@humansecurity.com) to do so.</Note>
+
+To access a token for the Code Defender or PCI DSS API:
+
+1. Navigate to **Code Defender > Settings > Integrations > Integration Settings.**
+2. Select **CD API Integration**.
+3. Copy an available token.
+
+Tokens have an expiration date. Make sure to generate a new token before the previous one expires. If you think a token has been compromised, contact [HUMAN support](http://contact-support@humansecurity.com/).
+
+## Authenticating requests
+
+You can authenticate requests using your token with `--header 'authorization: Bearer <token>'`. You **do not** need to provide a password. 
+
+For example, to authenticate a request to get a list of [custom rules](https://docs.humansecurity.com/applications-and-accounts/reference/getcustomrules):
+
+```curl
+curl --request GET \
+     --url https://console.humansecurity.com/api/v2/botDefender/customRules \
+     --header 'accept: application/json' \
+     --header 'authorization: Bearer <token>
+```

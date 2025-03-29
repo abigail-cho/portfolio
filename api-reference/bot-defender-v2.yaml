@@ -1,0 +1,308 @@
+openapi: 3.0.0
+info: 
+  title: Bot Defender API
+  description: API to access and manage Bot Defender information. 
+  version: "2.0"
+
+servers:
+  - url: https://console.humansecurity.com/api/v2/botDefender
+
+paths:
+  /customRules:
+    get:
+      tags:
+        - Custom rules
+      operationId: getCustomRules
+      summary: Get custom rules
+      description: >
+        Get all custom rules. 
+      responses:
+        '200': 
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "success"
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/customRule"
+        '400':
+          $ref: "#/components/responses/badRequest"
+    post:
+      tags:
+        - Custom rules
+      operationId: createCustomRule
+      summary: Create custom rule
+      description: >
+        Configure a custom allow or deny list rule.
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/customRule"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result: 
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "success"
+                  content:
+                    $ref: "#/components/schemas/customRule"
+        '400':
+          $ref: "#/components/responses/badRequest"
+  /customRules/{ruleId}:
+    get:
+      tags:
+        - Custom rules
+      operationId: getRuleById
+      summary: Get rule by ID
+      description: Get information about a rule by the rule's ID.
+      parameters:
+        - $ref: "#/components/parameters/ruleId"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result: 
+                    type: boolean
+                    example: true
+                  message: 
+                    type: string
+                    example: "success"
+                  content:
+                    $ref: "#/components/schemas/customRule"
+        '400':
+          $ref: "#/components/responses/badRequest"
+    put:
+      tags:
+        - Custom rules
+      operationId: updateRuleById
+      summary: Update rule by ID
+      description: >
+        Update a custom rule by the rule's ID.
+      parameters:
+        - $ref: "#/components/parameters/ruleId"
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/customRule"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "success"
+                  content:
+                    $ref: "#/components/schemas/customRule"
+        '400':
+          $ref: "#/components/responses/badRequest"
+    patch:
+      tags:
+        - Custom rules
+      operationId: updateFieldByRuleId
+      summary: Update field by rule ID
+      description: >
+        Update specified custom fields for a rule based on the rule's ID.
+      parameters:
+        - $ref: "#/components/parameters/ruleId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customRule"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "success"
+                  content:
+                    $ref: "#/components/schemas/customRule"
+    delete:
+      tags:
+        - Custom rules
+      operationId: deleteRuleById
+      summary: Delete rule by ID
+      description: >
+        Delete a custom rule by the rule's ID.
+      parameters:
+        - $ref: "#/components/parameters/ruleId"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "success"
+                  content:
+                    $ref: "#/components/schemas/customRule"
+        '400':
+          $ref: "#/components/responses/badRequest"
+
+components:
+  parameters:
+    ruleId:
+      name: ruleId
+      in: path
+      description: The ID for the rule. You can get this from the [get custom rules](/reference/getcustomrules) endpoint or from the Portal's Policy Settings.
+      required: true
+      schema:
+        type: string
+        example: "a747610a-e1d6-4e50-bc60-04c8787ac7b8"
+  schemas:
+    customRule:
+      type: object
+      properties:
+        ruleId:
+          type: string
+          example: "a747610a-e1d6-4e50-bc60-04c8787ac7b8"
+        priority: 
+          description: Range from 0 (the highest priority) to the number of rules minus 1 (the lowest priority). For example, if there are 10 rules, then the 0th rule is the highest priority while the 9th rule is the lowest priority.
+          type: integer
+        name: 
+          type: string
+        description: 
+          type: string
+        conditions:
+          description: A nested object with **exactly** two levels.
+          type: object
+          properties:
+            operator:
+              type: string
+              enum: 
+                - "$or"
+                - "$and"
+            children:
+              type: array
+              items:
+                type: object
+                properties:
+                  operator:
+                    type: string
+                    enum:
+                      - "$or"
+                      - "$and"
+                  children:
+                   type: array
+                   items:
+                    type: object
+                    properties:
+                      operator:
+                        type: string
+                        description: The operator to filter with. See [this article](https://human-enterprise-group.readme.io/human-security/reference/custom-rule-operators-and-conditions) for details on how to implement.
+                        enum:
+                          - $eq
+                          - $contains
+                          - $startsWith
+                          - $endsWith
+                          - $re
+                          - $notEndsWith
+                          - $ne
+                          - $in
+                          - $notIn
+                          - $exists
+                          - $notExists
+                      conditionType:
+                        type: string
+                        description: The condition to filter by. See [this article](https://human-enterprise-group.readme.io/human-security/reference/custom-rule-operators-and-conditions) for details on how to implement.
+                        enum:
+                          - "userAgent"
+                          - "domain"
+                          - "socketIps"
+                          - "socketIpASN"
+                          - "path"
+                          - "queryParam"
+                          - "header"
+                          - "httpMethod"
+                          - "deviceType"
+                          - "country"
+                          - "customParam"
+                      value:
+                        description: The value(s) to match based on the operator. Not required with exists or notExists, but required otherwise. See [this article](https://human-enterprise-group.readme.io/human-security/reference/custom-rule-operators-and-conditions) for details on how to implement.
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              type: string
+                      fieldOption: 
+                        description: The name of the field. Only required when using a `queryParam`, `header`, or `customParam` condition. See [this article](https://human-enterprise-group.readme.io/human-security/reference/custom-rule-operators-and-conditions) for details on how to implement.
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              type: string
+        actions:
+          type: array
+          items:
+            type: string
+            enum: 
+              - "allow"
+              - "blockWithChallenge"
+              - "hardBlock"
+        status:
+          type: string
+          enum: 
+            - "active"
+            - "paused"
+      required:
+        - name
+        - priority
+        - status
+        - actions
+        - conditionType
+        - operator
+  responses:
+    badRequest:
+      description: The request was invalid or did not have the proper authentication.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

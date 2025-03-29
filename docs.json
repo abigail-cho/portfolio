@@ -27,7 +27,8 @@
               {
                 "group": "Guides",
                 "pages": [
-                  "/product-documentation/understanding-sightline-dashboard-activity"
+                  "/product-documentation/understanding-sightline-dashboard-activity",
+                  "/product-documentation/create-custom-policy-rules"
                 ]
               },
               {
@@ -52,17 +53,20 @@
               {
                 "group": "API documentation",
                 "pages": [
+                  "api-reference/authentication",
                   {
                     "group": "Custom rules API",
                     "pages": [
-                      "api-reference/endpoint/get",
-                      "api-reference/endpoint/create",
-                      "api-reference/endpoint/delete",
-                      "api-reference/endpoint/webhook"
+                      "api-reference/custom-rules/custom-rules-context",
+                      "api-reference/custom-rules/get-rules",
+                      "api-reference/custom-rules/create-rule",
+                      "api-reference/custom-rules/get-rule-by-id",
+                      "api-reference/custom-rules/update-rule",
+                      "api-reference/custom-rules/update-field",
+                      "api-reference/custom-rules/delete-rule"
                     ]
                   },
-                  "api-reference/getMyWeatherAPI",
-                  "api-reference/authenticating-api-calls"
+                  "api-reference/getMyWeatherAPI"
                 ]
               },
               {

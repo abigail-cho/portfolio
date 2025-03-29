@@ -1,0 +1,93 @@
+---
+title: 'Create custom policy rules'
+description: An article instructing how to manually submit content for brands
+---
+
+<Accordion title="Why I included this article">This article describes how to create a policy rule in Bot Defender. A policy rule tells Bot Defender what type of bot activity to look out for and, when it finds bots that matches that, what to do with the bot that's doing it. To create a rule, users needed to use truth functions like AND or OR to set up conditions and actions.<br /><br />It turned out that many of our users were unfamiliar with truth functions, but they had to still use this feature to properly guard their applications. To make things even more complicated, the conditions could be nested and grouped together. I included this article because it showcases a fairly complicated procedure to create a rule as well as includes an explanation with an example rule to help explain how truth functions could be applied.<br /><br />I was the primary contributor to this article, but collaborated closely with Product while finalizing the content. This article is [publicly available](https://docs.humansecurity.com/applications-and-accounts/docs/bot-defender-create-custom-policy-rules) today, so I did not redact anything from the sample.</Accordion>
+
+You can create custom **Bot Defender policy rules** from the **Policy Settings** page. Custom rules let you dictate specific logic and conditions to fully control how Bot Defender handles your application’s traffic.
+
+You can learn how to create policy rules in this article. 
+
+## Prerequisites
+
+To create or make changes to custom rules, you have at least an **Analyst** role.
+
+## Create custom policy rules
+
+When creating a rule, you should keep the following in mind: 
+
+* If you’re creating a rule for internal testing or trusted traffic, we recommend you create an [access token](https://docs.humansecurity.com/applications-and-accounts/docs/bot-defender-policy-settings#access-tokens) instead.  
+* If you’re creating a rule to allow for a trusted or known bot, we recommend you check HUMAN’s list of [known bots and crawlers first.](https://docs.humansecurity.com/applications-and-accounts/docs/known-bots-and-crawlers) If it’s not there, then you can submit a suggestion to us so we can add it.  
+* Attackers can **abuse** rules that **allow** traffic only based on the **User Agent header**. We recommend avoiding this if possible. For more information on abusable rules, see [What are Abusable Policy Rules.](https://docs.humansecurity.com/applications-and-accounts/docs/known-bots-and-crawlers#what-are-abusable-policy-rules)
+
+<Note>You can also create and customize rules using our API. See our [docs](https://docs.humansecurity.com/applications-and-accounts/reference/getcustomrules) for more information.</Note>
+
+To make a new rule:
+
+1. Navigate to **Bot Defender > Policies > Policy Settings.**   
+2. Go to **Policy rules > Your custom rules** and select **Add custom rule.**  
+3. Enter a **Name** and **Description** for your rule, then select **Add rule.** This opens a new **Rule structure** panel with a **Conditions** and **Actions** menu.  
+4. Select the **Conditions** menu. Then, click and drag the first condition you want to use into the **IF > THIS()** field.  
+5. Complete the logic for that condition by selecting an **operator,** such as **in, is, exists,** or **does not exist,** and **value**.   
+6. If you want to add **nested conditions** to work with the one you just created, then repeat **Steps 4 and 5** for each condition. Be sure to also specify the **operator,** either **AND** or **OR,** on how the conditions will work together as well. Note that the chosen operator **persists** within the nested condition. In other words, you can’t have a second nested condition use OR and a third one use AND.  
+7. If you want to add an **entirely new** condition, select the **+** icon at the top of the section or drag a new condition towards the bottom of the section.   
+8. Specify how this condition will work with your first condition with either the **AND** or **OR** operators. Note that the chosen operator **persists** through the rule. In other words, you can’t have a second condition use OR and a third one use AND.   
+9. Repeat **Steps 4-6** for the new condition.   
+10. Repeat **Steps 7-9** for any additional conditions you want to include.  
+11. After you’ve made all the conditions you need, select the **Actions** menu. Then, click and drag the action you want to take into the **THEN > THIS** field. You can only have one action per rule.  
+12. Select **Save rule**.  
+13. Specify a **rule priority** if you haven’t already. See [About rule priorities](#about-rule-priorities) for more information on how they’re applied.  
+14. Select how you’d like to save the rule:   
+    * **Save & Pause:** Create the rule, but do not start applying it to traffic yet.  
+    * **Save & Activate:** Create the rule and immediately start applying it to traffic. 
+
+You have created your new rule, and it should now appear in your **Policy Rules > Your custom rules.**
+
+### About rule priorities
+
+Bot Defender prioritizes active rules by **order of priority,** with rule number 1 being most important. This means that, when matching script actions to policy rules, Bot Defender uses the following logic:
+
+1. Bot Defender attempts to match traffic to the conditions in each policy rule **one by one**.  
+2. When Bot Defender finds the **first policy rule** with conditions that match, then Bot Defender performs the **action** related to that rule.  
+3. Bot Defender **stops** attempting to match the traffic with any remaining policy rules.
+
+This means that if you have two or more policy rules with matching conditions, then Bot Defender prioritizes completing the action associated with the **earlier** rule, then **stop** considering the remaining rules. So, for example, say you have ordered your policy rules like this: 
+
+1. Policy rule that **allows** traffic from the **United States of America** and the **United Kingdom.**  
+2. Policy rule that **allows** traffic from **all domains that end with .com.**  
+3. Policy rule that **blocks** traffic from the **United Kingdom.**
+
+If your application receives traffic from the **United Kingdom,** then **all traffic are allowed** despite the fact that **Rule 3** blocks traffic from the UK. This is because **all** traffic from the UK is already allowed in **Policy Rule 1.** Since the latter is the earlier rule, it's prioritized, and Bot Defender **never** continues on to consider Rule 3.
+
+### Example rule
+
+Below is a sample rule and an explanation of its logic. You can reference this if you’re having trouble understanding how policy rule logic works. 
+
+![An example rule](/images/create-custom-policy-rules/example-rule.png)
+
+In this rule, there are two sets of nested conditions and one action to take. This rule’s logic dictates that:
+
+* If traffic is either from the **United Kingdom** or the **United States of America** **OR** the **IP address** is 1.1.1.1, **OR**  
+* If traffic has an existing header, **test-header**, **AND** came from a domain ending with **.com**,  
+* **THEN** Bot Defender will **Allow** that traffic.
+
+The **action** is straightforward: if traffic matches the listed conditions, then according to this rule, Bot Defender will **Allow** that traffic. 
+
+The **conditions** logic can be more complicated. Let’s start with the first set of conditions: 
+
+* The **country** condition tells Bot Defender to look for traffic that is **in** the listed countries. In this case, those are the **United Kingdom (GB)** and the **United States of America (US).**  
+* The **IP address** condition tells Bot Defender to look for traffic that **is** the listed IPs. In this case, 1.1.1.1.   
+* The **OR** between the two conditions means that, for this first set, Bot Defender will apply the chosen action if detected traffic matches **at least one of** the conditions. 
+
+**To sum it up:** the first set of nested conditions tells Bot Defender to **Allow** traffic through if the traffic is from **exactly** the UK or the US **or** if the traffic’s IP address is **exactly** 1.1.1.1. For example, traffic from the US with an IP of 2.2.2.2 will be allowed, as will traffic from Canada with an IP of 1.1.1.1. 
+
+Next, let’s look at the second set of conditions:
+
+* The **Header** condition tells Bot Defender to look for traffic where the specified headers, which is **test-header** in this case, **exists.**  
+* The **Domain** condition tells Bot Defender to look for traffic originating from domains that **end with** the specified ending, which is **.com** in this example.   
+* The **AND** between the two conditions means that, for this second set, Bot Defender will allow traffic if it matches **both** of the conditions at the same time.
+
+**To sum it up**: the second set of nested conditions tells Bot Defender to **Allow** traffic through if a header named **test-header** exists **and** the domain it originated from ends with **.com** at the same time. For example, traffic with a header **test-header** and from **google.com** will be allowed, but traffic without a header will **not** be allowed, even if it came from **google.com**.
+
+To put all the logic together, we need to consider the operator **OR()** between the two nested conditions. This **OR()** means that Bot Defender will **Allow** traffic if traffic matches **at least one** of the nested conditions. 
