@@ -102,12 +102,6 @@
         "icon": "pen-clip",
         "tabs": [
           {
-            "tab": "2025",
-            "pages": [
-              "/blog/blog-test"
-            ]
-          },
-          {
             "tab": "2024",
             "pages": [
               "/blog/2024/i-love-chatspeak",
