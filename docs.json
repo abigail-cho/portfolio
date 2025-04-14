@@ -102,6 +102,12 @@
         "icon": "pen-clip",
         "tabs": [
           {
+            "tab": "2025",
+            "pages": [
+              "/blog/2025/tech-misnomer"
+            ]
+          },
+          {
             "tab": "2024",
             "pages": [
               "/blog/2024/i-love-chatspeak",
