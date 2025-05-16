@@ -103,15 +103,25 @@
         "tabs": [
           {
             "tab": "2025",
-            "pages": [
-              "/blog/2025/tech-misnomer"
+            "groups": [
+              {
+                "group": "Posts",
+                "pages": [
+                  "/blog/2025/tech-misnomer"
+                ]
+              }
             ]
           },
           {
             "tab": "2024",
-            "pages": [
-              "/blog/2024/i-love-chatspeak",
-              "/blog/2024/learning-to-say-no-but"
+            "groups": [
+              {
+                "group": "Posts",
+                "pages": [
+                  "/blog/2024/i-love-chatspeak",
+                  "/blog/2024/learning-to-say-no-but"
+                ]
+              }
             ]
           }
         ]
