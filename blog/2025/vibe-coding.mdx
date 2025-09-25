@@ -1,0 +1,403 @@
+---
+title: "Vibe coding is a tech writer's new best friend"
+description: 'September 25, 2025'
+---
+
+With the rise of accessible AI in the workplace, the tech writing community has been stricken with the idea that our jobs might be taken over by LLMs. And, to be fair, this might be true for organizations that don't value what good technical writers bring to the table beyond "just" writing: the ability to get into the perspective of a user. 
+
+But I think that this fear is overstated, and that AI is just another tool—and an excellent one at that—to automate and accelerate tech writing tasks just as much as any other technology out there. However, it's a matter of figuring out how to use it effectively. I've been trying to use it more in my day-to-day just to get used to it in my workflow, and recently, I had a great opportunity to really get AI to do a lot of the hefty work for me. 
+
+## The woes of migration
+
+Every technical writer knows the daunting feeling that comes with a (shudder) **docs migration.** We recently completed a migration, and I was working solo in conjunction with the new vendor to make sure everything was formatted, styled, and rendered correctly before launch. 
+
+Now, as much as we try to avoid it, there's always **something** that goes awry during a migration—I've never had a completely smooth, flawless, painless one yet. In this case, amongst other things, there were some docs that were technically migrated correctly, but due to formatting differences between the old vendor and new vendor, some of the tabbed code blocks looked completely different.
+
+In our original vendor, tabbed code blocks were automatically detected from code block fences without empty lines between them. It also created titles based on any text that immediately followed the syntax selection (the "From v4.0.0" and "Up to v3.3.0" in the examples below). 
+
+<Tabs>
+    <Tab title="Tabbed code blocks example">
+        ````
+        ```none From v4.0.0
+            {
+                new_id: 'id',
+                new_token: 'token',
+            };
+        ```
+        ```text Up to v3.3.0
+            {
+                id: 'id',
+                token: 'token',
+            };
+        ```
+        ````
+    </Tab>
+    <Tab title="Render in Vendor 1">
+        <CodeGroup>
+        ```none From v4.0.0
+        {
+            new_id: 'id',
+            new_token: 'token',
+        };
+        ```
+        ```text Up to v3.3.0
+        {
+            id: 'id',
+            token: 'token',
+        };
+        ```
+        </CodeGroup>
+    </Tab>
+</Tabs>
+
+Meanwhile, in the new docs vendor, you needed specific `<CodeBlocks> </CodeBlocks>` fences to make tabbed groups. Furthermore, while the first vendor detected the title of each code block after the syntax selector, the new vendor doesn't do this without a `title` property. These weren't automatically added in by the vendor during migration, which meant that the same Markdown ended up looking like this:
+
+<Tabs>
+    <Tab title="Tabbed code blocks example">
+        ````
+        ```none From v4.0.0
+            {
+                new_id: 'id',
+                new_token: 'token',
+            };
+        ```
+        ```text Up to v3.3.0
+            {
+                id: 'id',
+                token: 'token',
+            };
+        ```
+        ````
+    </Tab>
+    <Tab title="Render in Vendor 2">
+    ```none
+    {
+        new_id: 'id',
+        new_token: 'token',
+    };
+    ```
+
+    ```text
+    {
+        id: 'id',
+        token: 'token',
+    };
+    ```
+    </Tab>
+</Tabs>
+
+Note that in Vendor 2, the code blocks were two separate ones instead of grouped together in a single code block with tabs. This change wasn't as good of a user experience, and it was lacking important context about the version usage because the titles weren't displaying. So, to preserve the original docs' intent, I knew that all these instances needed to be updated.
+
+Thankfully, I knew that our docs weren't **too** code heavy, and the actual instances of tabbed code blocks versus solo code blocks, which didn't need to be fixed, were even less frequent. So, I took it upon myself to update these myself and (foolishly) assumed it wouldn't take too much effort.
+
+## Ah, hubris
+
+At first, going through the docs for these blocks wasn't too bad. I basically just `Cmd+F`'d two sequential lines of ` ``` ` and updated one or two instances of tabbed code blocks per each article. This usually included adding `<CodeBlocks> </CodeBlocks>` around them, adding in the `title` property if needed, and maybe adding in the syntax if it was missing. Tabbed code blocks in Vender 2 ended up looking like this:
+
+<Tabs>
+    <Tab title="Markdown in Vendor 1">
+        ````
+        ```none From v4.0.0
+            {
+                new_id: 'id',
+                new_token: 'token',
+            };
+        ```
+        ```text Up to v3.3.0
+            {
+                id: 'id',
+                token: 'token',
+            };
+        ```
+        ````
+    </Tab>
+    <Tab title="MDX in Vendor 2">
+        ````
+        <CodeBlocks>
+            ```json title="From v4.0.0"
+                {
+                    new_id: 'id',
+                    new_token: 'token',
+                };
+            ```
+            ```json title="Up to v3.3.0"
+                {
+                    id: 'id',
+                    token: 'token',
+                };
+            ```
+        </CodeBlocks>
+        ````
+    </Tab>
+</Tabs>
+
+It was a bit tedious, but it wasn't too bad. I was cruising through each article I found these in, and there were only about 40 articles total that had these specific code blocks. I wasn't too worried. 
+
+Oh boy. My confidence was short-lived.
+
+I eventually ran into an article that was 1430 lines long and had 40 separate pairs of code blocks. These all required a new `title` property and I got through about five of them before my eyes started to glaze over. It was at this point that I remembered that AI was available to me!
+
+## AI hand-holding at its finest
+
+At this point, you may be wondering why I didn't put together a script to programmatically update these instead. The answer is I'm simply not experienced enough at coding to make my own script. There also weren't too many articles that had this problem, so I didn't think the time it'd take to figure out how to write a script was worth it until I encountered the very long file with lots of code blocks that needed fixing. However, I knew that what I was trying to do basically boiled down to searching for specific character patterns and sticking the same text into it every time. I know enough about coding to know that this type of problem can easily be iterated through by a computer, so I now I needed something to write a functional program for me.
+
+I'd used AI at this point for pretty simple tasks like alphabetizing long tables by a column name or updating URL paths according to a specific pattern. These were quick and easy for me to confirm they worked, and I liked how fast AI completed these for me. These let me dip my toe into using AI to solve workflow patterns, and I was hopeful it could give me good results for a fully vibe-coded script as well.
+
+To start, I went to Gemini (purely because it's what my company uses) and tried to give it a very specific prompt. I gave it a direct example of the code blocks I wanted to update and what I wanted changed: the `<CodeBlocks>`, the `title` property, and updating the syntax to `json` if it said `none`. For this last request, I only did this because I knew all the code examples were in JSON in the doc. I assumed this would make it easier for the LLM to give me a functional result versus asking it to accurately identify each code example's syntax by itself. You can find my exact prompt below if you're curious.
+
+<Accordion title="My initial prompt">
+I have a file that has related code blocks like this: 
+
+````
+ ```none From v4.0.0
+      { 
+         new_id: 'id',
+         new_token: 'token',
+      };
+ ```
+ ```none From v3.3.0
+      { 
+         id: 'id',
+        token: 'token',
+     };
+ ```
+````
+I want to programmatically update these so that:
+
+1. Related code blocks are wrapped in `<CodeBlocks>` `</CodeBlocks>`
+2. If the syntax of the code block is "none", it's replaced by "json".
+3. If there's text after the syntax highlight, such as "From v4.0.0" in the example above, that it's updated to look like title="From v4.0.0". Keep in mind that there are some code blocks that don't have this extra text, and this text can vary between code blocks.
+</Accordion>
+
+At first, Gemini basically gave me a step-by-step explanation of how the script would work before giving me a script in Python. I had to ask it to give it to me in JavaScript, since I knew I had Node already to run it. As requested, Gemini gave me the script in JavaScript. You can check exactly what it gave me below.
+
+<Accordion title="Gemini's first script iteration">
+```js
+const fs = require('fs');
+
+const filePath = process.argv[2];
+
+if (!filePath) {
+    console.error('Please provide a file path as an argument.');
+    process.exit(1);
+}
+
+try {
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = fileContent.split('\n');
+    const newLines = [];
+   
+    let i = 0;
+    while (i < lines.length) {
+        let line = lines[i];
+       
+        // Regex to find code block fence, syntax, and title
+        const codeBlockRegex = /```([a-zA-Z]+)?\s*(.*)$/;
+        const match = line.match(codeBlockRegex);
+
+        if (match) {
+            const syntax = match[1] || '';
+            const title = match[2] || '';
+           
+            // Look ahead for a related code block
+            let nextLineIndex = i + 1;
+            while (nextLineIndex < lines.length && lines[nextLineIndex].trim() === '') {
+                nextLineIndex++;
+            }
+            const nextLineMatch = nextLineIndex < lines.length ? lines[nextLineIndex].match(codeBlockRegex) : null;
+           
+            // Check if this block is the start of a related pair
+            if (nextLineMatch) {
+                newLines.push('<CodeBlocks>');
+               
+                // Process the first block in the pair
+                const newSyntax1 = syntax === 'none' ? 'json' : syntax;
+                const newTitle1 = title ? ` Title="${title}"` : '';
+                newLines.push(`\`\`\`${newSyntax1}${newTitle1}`);
+                i++;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+
+                // Process the second block in the pair
+                const nextSyntax = nextLineMatch[1] || '';
+                const nextTitle = nextLineMatch[2] || '';
+                const newSyntax2 = nextSyntax === 'none' ? 'json' : nextSyntax;
+                const newTitle2 = nextTitle ? ` Title="${nextTitle}"` : '';
+                newLines.push(`\`\`\`${newSyntax2}${newTitle2}`);
+                i = nextLineIndex + 1;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+
+                newLines.push('</CodeBlocks>');
+                i++;
+            } else {
+                // Not a related pair, process as a single block
+                const newSyntax = syntax === 'none' ? 'json' : syntax;
+                const newTitle = title ? ` Title="${title}"` : '';
+                newLines.push(`\`\`\`${newSyntax}${newTitle}`);
+                i++;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+                i++;
+            }
+        } else {
+            newLines.push(line);
+            i++;
+        }
+    }
+
+    const updatedContent = newLines.join('\n');
+    fs.writeFileSync(filePath, updatedContent);
+    console.log('File updated successfully!');
+} catch (error) {
+    console.error('Error processing file:', error);
+}
+```
+</Accordion>
+
+Now, as I said, I'm not a programmer by any stretch, but I know just enough to get by. I'm also still a bit of a skeptic for LLMs. So, I gave the script a cursory review to make sure it wasn't doing something obviously destructive, like deleting the file or completely overwriting the code inside the code fences. To my entry-level eyes, it didn't look like it was doing that, so I decided to proceed. Still, since I was scared and paranoid, I made a `file-test.mdx` copy to test the script on instead of updating the real one.
+
+To my pleasant surprise, after I ran it, it worked pretty well! It updated code block pairs with `title` properties and new syntaxes while avoiding solo code blocks. It also didn't change any of the content inside of the code blocks, which was my biggest concern (I was already pretty sure it wouldn't do this, but I was happy to confirm it). However, it didn't add the `<CodeBlocks>` fences I needed. So, I went back to Gemini and told it so.
+
+Gemini and I went back and forth a few times to fine tune the script. It actually ended up giving me the correct script on the third attempt, which was far fewer attempts than I was expecting. I double-checked all the changes it made on the test file, and everything looked exactly the way that I wanted it to. After that, I ran the script on the original file and continued to use it on the remaining ones. I was very impressed at how simple and fast it was to create a fully working script from nothing but a description with an LLM.
+
+<Accordion title="Gemini's third and final script attempt">
+```js
+const fs = require('fs');
+
+const filePath = process.argv[2];
+
+if (!filePath) {
+    console.error('Please provide a file path as an argument.');
+    process.exit(1);
+}
+
+try {
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = fileContent.split('\n');
+    const newLines = [];
+   
+    let i = 0;
+    while (i < lines.length) {
+        let line = lines[i];
+       
+        // Regex to find code block fence, syntax, and optional title
+        const codeBlockRegex = /```([a-zA-Z]+)?\s*(.*)$/;
+        const match = line.match(codeBlockRegex);
+
+        if (match) {
+            const syntax = match[1] || '';
+            const title = match[2] || '';
+           
+            // Find the closing fence of the current block
+            let firstBlockEndIndex = -1;
+            let tempIndex = i + 1;
+            while (tempIndex < lines.length) {
+                if (lines[tempIndex].trim().startsWith('```')) {
+                    firstBlockEndIndex = tempIndex;
+                    break;
+                }
+                tempIndex++;
+            }
+           
+            // Find the start of the next potential code block
+            let secondBlockStartIndex = -1;
+            tempIndex = firstBlockEndIndex + 1;
+            while (tempIndex < lines.length) {
+                if (lines[tempIndex].trim() === '') {
+                    tempIndex++;
+                    continue;
+                }
+                if (lines[tempIndex].trim().startsWith('```')) {
+                    secondBlockStartIndex = tempIndex;
+                    break;
+                }
+                // Stop if any non-blank line is found that isn't a code block
+                break;
+            }
+           
+            // Check if this is the start of a related pair
+            if (firstBlockEndIndex !== -1 && secondBlockStartIndex !== -1) {
+                newLines.push('<CodeBlocks>');
+               
+                // Process the first block
+                const newSyntax1 = syntax === 'none' ? 'json' : syntax;
+                const newTitle1 = title ? ` Title="${title}"` : '';
+                newLines.push(`\`\`\`${newSyntax1}${newTitle1}`);
+                i++;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+
+                // Process the second block
+                const secondBlockLine = lines[secondBlockStartIndex];
+                const secondMatch = secondBlockLine.match(codeBlockRegex);
+                const nextSyntax = secondMatch[1] || '';
+                const nextTitle = secondMatch[2] || '';
+                const newSyntax2 = nextSyntax === 'none' ? 'json' : nextSyntax;
+                const newTitle2 = nextTitle ? ` Title="${nextTitle}"` : '';
+                newLines.push(`\`\`\`${newSyntax2}${newTitle2}`);
+                i = secondBlockStartIndex + 1;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+               
+                newLines.push('</CodeBlocks>');
+                i++;
+            } else {
+                // Process as a single, standalone block
+                const newSyntax = syntax === 'none' ? 'json' : syntax;
+                const newTitle = title ? ` Title="${title}"` : '';
+                newLines.push(`\`\`\`${newSyntax}${newTitle}`);
+                i++;
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    newLines.push(lines[i]);
+                    i++;
+                }
+                newLines.push('```');
+                i++;
+            }
+        } else {
+            newLines.push(line);
+            i++;
+        }
+    }
+
+    const updatedContent = newLines.join('\n');
+    fs.writeFileSync(filePath, updatedContent);
+    console.log('File updated successfully!');
+} catch (error) {
+    console.error('Error processing file:', error);
+}
+```
+</Accordion>
+
+## But was it worth it?
+
+Undoubtedly, using a script to update each file was much faster and efficient than doing it manually. On the file with 1430 lines alone, I probably saved **at least** 45 minutes of manually scrolling, identifying code block pairs, inserting `<CodeBlocks>` fences, adding `title`s, and updating the syntax—along with undoing any inevitable typos I would've made, ensuring I didn't affect the code examples inside the code fences, and other things that would've slowed me down just by being human. 
+
+However, the **real** timesaver was undoubtedly the LLM generating the script for me. This was the real blocker to my problem. If I didn't use Gemini, I would've had two options:
+
+1. **Asking an engineer to create a script for me.** I wanted to avoid this option because this wasn't an urgent issue, and I didn't want to take engineering resources away from actual product development. I also would've had to spend time explaining my issue, finding someone available to do it, and justifying why I deserved their time in the first place. This probably would've taken at least a day.  
+2. **Making the script myself.** Again, I am far from a competent coder. Maybe I could've put together a script that worked eventually, but I would've had to spend time researching JavaScript from essentially scratch, Google similar solutions, and basically trial and error my way through each and every line of code for hours. I probably would've lasted a day until I gave up.
+
+Before LLMs, when being faced with these choices, I would've just resigned myself to updating the file manually—I wouldn't have had a choice. It would've taken me a couple of hours, but that would've still been a lot faster than the alternatives.
+
+But **with** LLMs, I was able to just **ask** for a solution based on my needs and get back a pretty damn good start within **seconds.** After another 5 minutes of testing and iterating, I got a fully functional script and was able to solve my problem instantly. **Minutes!** Fractions of time compared to the two options above. I think that alone should prove how useful a tool like an LLM is. It saves inordinate amounts of time to complete tasks on your behalf so you can continue about your day—just like how good documentation does. 
+
+Of course, this doesn't mean anyone should depend on LLMs to do your job for you, and it never hurts to be cautious. I still made sure to double-check its work and used it on a test file first. I also would never trust it to put together a full-fledged app either; my problem was a pretty simple "find things that fit this pattern and update them with this new stuff"—something I knew could be done in a straightforward way with programming logic. Still, I think the value just from this small experiment is clear.
+
+If you're still on the fence about AI and LLMs, here's your sign to **at least** give it an honest shot. Try incorporating it into a familiar workflow to see if it saves you any time, or present it a problem you've been having and see what it suggests. Once you get the hang of prompting it and improving its results, it may surprise you! I must say that, after this foray, I'm certainly excited to find more ways to integrate AI into my processes in the future.
