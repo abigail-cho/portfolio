@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "willow",
+  "theme": "palm",
   "name": "Abby's Portfolio",
   "description": "Technical writing portfolio for Abigail Cho.",
   "colors": {
