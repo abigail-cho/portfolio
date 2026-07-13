@@ -1,0 +1,40 @@
+---
+title: Overview
+description: An article describing how HUMAN's defense system works
+---
+
+<Accordion title="Why I included this article">This article describes how HUMAN's unique defense solution and components come together to protect customers' applications. I included this because previously, we lacked comprehensive explanation on the three major parts of this system: the Sensor, the Enforcer, and the Detector. I wanted to write a summary that broad audiences could understand, even if they weren't cybersecurity professionals, and I am confident in how I described the relationships between them all here.<br/><br/>
+I had majority contribution to this article, which is [available publicly](https://docs.humansecurity.com/applications/overview) today. Because of this, I have not redacted anything from this article.</Accordion>
+
+HUMAN’s Applications Protection platform architecture is based on three major elements: 
+
+* The HUMAN Sensor  
+* The HUMAN Enforcer  
+* The HUMAN Detector
+
+These three parts work together as a whole to provide a holistic defense strategy to protect your application from unwanted bot and agent activity. 
+
+![HUMAN defense system with the Detector, server, and application](/images/overview/overview.svg)
+
+## Detector
+
+The HUMAN Detector is HUMAN’s cloud-based risk analysis engine that’s responsible for ingesting and reviewing all request data sent from the HUMAN **Sensor** and **Enforcer**. The Detector uses machine learning and behavioral analytics to determine an interaction's **risk score** from 0-100, then sends this score to the Sensor, which encrypts or encodes that score and inserts it as a cookie on the client. The Detector also continuously learns and improves its models based on reported results. This ensures HUMAN’s risk assessment and defense mechanism stays relevant while adjusting to your unique use case.  
+
+While the Detector typically doesn’t send information to the Enforcer directly, it occasionally sends the risk score when the Enforcer requests it via the **Risk API.** This only happens when the cookie is invalid or missing. 
+
+## Sensor
+
+The HUMAN **Sensor** is the mechanism that collects data about the user journey on the browser side. It records your application’s users and devices, their behaviors, and different network activities, then sends these signals to the HUMAN **Detector**, which calculates a **risk score** for the user. Then, the Sensor encrypts or encodes the score and creates a cookie that’s sent to the HUMAN **Enforcer**, which decides whether to block or allow the user based on the score. 
+
+HUMAN provides a JavaScript snippet that you can insert into your application. This snippet loads the Sensor in the browser. 
+
+## Enforcer
+
+The HUMAN **Enforcer** is a lightweight SDK that is typically installed on your CDN, load balancer, or origin. We recommend you install the Enforcer server-side so that it can accurately review each protected request and send this data to the HUMAN **Detector.** This data, in combination with the **Sensor’s** client-side data, determines the **risk score** for the user. 
+
+The Enforcer receives the risk score in one of two ways:
+
+1. From the client request as a cookie, which was created by the Sensor.   
+2. Directly from the **Detector**. This only happens when the cookie is invalid or missing from the client request. If that’s the case, then the Enforcer requests the score from the Detector via HUMAN’s **Risk API.**
+
+Based on the score and any existing **policy rules** you set in the HUMAN Console, the Enforcer decides whether to block or allow the user. 

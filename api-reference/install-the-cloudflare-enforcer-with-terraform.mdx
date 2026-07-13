@@ -1,0 +1,297 @@
+---
+title: Install the Cloudflare Enforcer with Terraform
+slug: An article instructing how to install a proprietary Enforcer the Cloudflare Terraform provider
+---
+
+<Accordion title="Why I included this article">
+
+A procedural article describing how to install the company’s proprietary code on the reader’s server using a Cloudflare Worker and the Cloudflare Terraform provider. This installation was required to use this company’s more popular products. This method is a more technical one compared to the [standard method](https://abby.mintlify.app/api-reference/install-the-cloudflare-enforcer) I also shared. The developers shared the initial README for this SDK.
+
+I chose to include this article because I believe it showcases my ability to take content provided directly from developers (and SMEs in general) and organize it into a organized flow. I ended up moving entire sections around, removing redundant lines, and merging similar concepts together to create a better reading experience for the user. Further, I think this showcases my ability to use web components in combination with text to the fullest.
+
+I encourage you to also check it out on the [official site](https://docs.humansecurity.com/applications/install-the-cloudflare-enforcer-with-terraform), which has all the customizations showcased.
+
+I had majority contribution to this article with close collaboration with the Engineering team. This article is available publicly, so nothing has been redacted in the sample. You can view the current version [on their site.](https://docs.humansecurity.com/applications/install-the-cloudflare-enforcer-with-terraform)
+</Accordion>
+
+If your organization uses **Cloudflare**, you can use HUMAN’s **Cloudflare Enforcer** to protect against malicious behavior. The Cloudflare Enforcer is installed using a Cloudflare **Worker**, or a snippet of code, and is deployed to your content delivery network (CDN). The Enforcer dictates how traffic should be handled per your organization’s standards. 
+
+You can learn how to install the Cloudflare Enforcer using the [Cloudflare Terraform provider](https://registry.terraform.io/providers/cloudflare/cloudflare/latest) with this guide. 
+
+<Note>
+For other installation options, see: 
+- [Installation with the Deploy Tool (recommended)](https://docs.humansecurity.com/applications/install-the-cloudflare-enforcer)
+- [Manual installation](https://docs.humansecurity.com/applications/manually-install-the-cloudflare-enforcer)
+</Note>
+
+## Prerequisites
+
+- Terraform version 1.3 or higher. See [Terraform's documentation](https://developer.hashicorp.com/terraform/install) to install the latest version.
+- On the machine running `terraform apply` (not required when `use_prebuilt = true` or `use_custom_worker = true`): 
+    - **Node Version Manager (nvm)** installed on your device. See nvm’s [GitHub repository](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) to learn how to install it.
+    - The latest version of **Node.js.** After installing nvm, enter `nvm install stable` in your CLI to install it.
+    - **Wrangler** installed on your device. You can enter `npm install -g wrangler` in your CLI to install it.
+- Downloaded Cloudflare Terraform deployment files. Contact [HUMAN support](mailto:support@humansecurity.com) to get the files.
+- Your Cloudflare account ID
+- A Cloudflare API token with the following permissions: 
+    - **Workers Scripts:** Edit
+    - **Workers KV Storage:** Edit
+    - **Worker Routes:** Edit
+    - **Zone:** Read (to resolve zone names to IDs)
+- Your unique HUMAN information:
+    - Your **Application ID.** You can find this under **Platform Settings > Applications > Overview** in the HUMAN console. If you have multiple environments, you will also have multiple Application IDs, so be sure to choose the correct ID for the environment you want to install on.
+    - Your **Server Token.** You can find this under **Platform Settings > Applications**, then selecting an application and navigating to **Application settings > Server token.**
+    - Your **Risk Cookie Key.** You can find this under **Bot Defender > Policies > Policy Settings > Policy Information.**
+
+## File structure
+
+The Terraform module uses the following files. Refer to the [detailed file information](#detailed-file-information) for more on the highlighted files.
+
+<Tree>
+    <Tree.Folder name="terraform" defaultOpen>
+        <Tree.File name="versions.tf" />
+        <Tree.File name="variables.tf" />
+        <Tree.File name="build.tf" />
+        <Tree.File name="main.tf" />
+        <Tree.File name="outputs.tf" />
+        <Tree.File name="README.md" />
+        <Tree.File name=".gitignore" />
+        <Tree.Folder name="worker" defaultOpen>
+            <Tree.File name="package.json" />
+            <Tree.File name="wrangler.toml"  />
+            <Tree.File name="tsconfig.json" />
+            <Tree.File name=".gitignore"  />
+            <Tree.Folder name="src" defaultOpen>
+                <Tree.File name="index.ts" />
+                <File name="humansecurity.ts" />
+            </Tree.Folder>
+        </Tree.Folder>
+        <Tree.Folder name="examples">
+            <Tree.Folder name="basic">
+                <Tree.File name="main.tf" />
+            </Tree.Folder>
+        </Tree.Folder>
+    </Tree.Folder>
+</Tree>
+
+<Expandable title="Detailed file information">
+| File | Purpose |
+|---|---|
+| `versions.tf` | Pins the Cloudflare provider to `~> 5.0` and declares the `null` and `local` providers needed for the build step |
+| `variables.tf` | Declares every input the module accepts: credentials, `enforcer_config`, routes, KV options, and build-mode flags |
+| `build.tf` | Uses a `local_file` resource to write your `enforcer_config` as JSON into `worker/src/config.json`, then a `null_resource` runs `npm install` and `wrangler deploy --dry-run` to produce `worker/dist/index.js`. Re-runs when `enforcer_config`, any Worker source file (`src/*.ts`), `wrangler.toml`, `tsconfig.json`, `package.json`, or `package-lock.json` changes. |
+| `main.tf` | Declares the four Cloudflare resources: KV namespace, Worker definition, Worker version (script upload + bindings), and one route per entry in `var.routes` |
+| `outputs.tf` | Exposes the Cloudflare dashboard URL and the KV namespace ID after apply |
+| `worker/src/index.ts` | The actual Worker script that initializes the Enforcer with `config.json` and the `env` (for KV access), then runs the `enforce`/`fetch`/`postEnforce` loop |
+| `worker/src/humansecurity.ts` | Thin re-export of `@humansecurity/cloudflare-enforcer` so the Worker can import it as a local module |
+| `worker/wrangler.toml` | Wrangler build configuration with a placeholder KV namespace ID. The real ID is injected at deploy time through the `cloudflare_worker_version` bindings block, so this placeholder is only used during the dry-run build |
+</Expandable>
+
+## Installation
+
+<Steps>
+<Step title="First-time initialization">
+
+1. Navigate to the Terraform `.gitignore` directory: 
+
+```bash 
+cd path/to/cloudflare-enforcer/terraform/.gitignore
+```
+
+2. Create a new `terraform.tfvars` file in your Terraform module directory, and ensure `terraform.tfvars` or `*.tfvars` is listed in `.gitignore` so Git does not track it.
+
+<Warning>
+Never commit this file! Ensure to include it in `.gitignore`.
+</Warning>
+
+```bash terraform.tfvars wordWrap
+cloudflare_api_token = "your-cloudflare-api-token" 
+account_id           = "your-cloudflare-account-id"
+worker_name          = "my-enforcer" # Name of the deployed Cloudflare Worker
+
+create_kv_namespace  = true # Set to false if you already have a KV namespace you want to reuse instead of creating a new one
+# Only include if create_kv_namespace = false. The ID of the existing KV namespace:
+# existing_kv_namespace_id = "your-existing-kv-namespace-id" 
+
+use_custom_worker = false # Set to true if you want to bypass the managed worker or source and deploy your own prebuilt JS. Node.js and npm are not required when this is set to true.
+# Only include if use_custom_worker = true. The path to the prebuilt JS file:
+# custom_worker_path = "/path/to/your/worker.js" 
+
+use_prebuilt = false # Set to true if you want to skip the build step and use an existing `worker/dist/index.js` file.
+
+enforcer_config = {
+  px_app_id        = "PXabc123de"
+  px_auth_token    = "your-auth-token"
+  px_cookie_secret = "your-32-char-cookie-secret"
+
+  # Optional settings — add only what you need:
+  # px_blocking_score                  = 100
+  # px_module_mode                     = "active_blocking"
+  # px_agentic_trust_enabled           = true
+  # px_agentic_trust_mcp_endpoint_path = "/mcp"
+  # px_async_timeout                   = 200
+  # px_max_activity_batch_size         = 20
+  # px_batch_activities_timeout_ms     = 1000
+}
+
+routes = [
+  { pattern = "example.com/*",     zone_name = "example.com" },
+  { pattern = "www.example.com/*", zone_name = "example.com" },
+]
+```
+
+3. Download the Terraform providers:
+
+```bash
+terraform init
+```
+
+4. Commit the generated `.terraform.lock.hcl` to version control. This locks provider versions and ensures reproducible applies across machines and CI runs.
+
+5. If you have an existing Cloudflare Worker, KV namespace, or routes that were previously deployed, import them into the Terraform state:
+
+```bash
+# Import the Worker definition
+terraform import cloudflare_worker.enforcer <account_id>/<worker_name>
+
+# Import the KV namespace (only if create_kv_namespace = true)
+terraform import 'cloudflare_workers_kv_namespace.enforcer_kv[0]' <account_id>/<namespace_id>
+
+# Import each route (use the exact pattern as the map key)
+terraform import 'cloudflare_workers_route.routes["example.com/*"]' <zone_id>/<route_id>
+```
+
+6. Preview the plan without making any changes:
+
+```bash
+terraform plan -var-file="terraform.tfvars"
+```
+</Step>
+<Step title="Deployment">
+<Tabs>
+<Tab title="Standard deployment">
+To deploy, run:
+```bash
+terraform apply -var-file="terraform.tfvars"
+```
+</Tab>
+<Tab title="CI/CD deployment">
+For pipelines where the build step runs separately, such as on a build agent with Node.js while the deploy runs on a minimal Terraform-only agent:
+
+1. Build the Worker on the build agent:
+
+```bash
+cd terraform/worker
+npm install
+# Write config from environment variable
+echo "$ENFORCER_CONFIG_JSON" > src/config.json
+npx wrangler deploy --dry-run --outdir dist
+```
+
+2. Deploy on the Terraform agent. When `use_prebuilt = true`, the `local_file` and `null_resource` build resources are skipped. Terraform reads `worker/dist/index.js` directly and uploads it.
+
+```bash
+cd ..
+terraform init
+terraform apply \
+  -var="use_prebuilt=true" \
+  -var-file="terraform.tfvars"
+```
+
+</Tab>
+</Tabs>
+After deploying, Terraform will:
+1. Write `enforcer_config` to `worker/src/config.json`
+2. Run `npm install`, then `wrangler deploy --dry-run` inside `worker/`
+3. Create a KV namespace in your Cloudflare account
+4. Create (or update) the Worker and upload the built script
+5. Create the routes
+
+When complete, you'll see:
+<Note>
+To see `kv_namespace_id`, run: 
+```bash
+terraform output kv_namespace_id
+```
+</Note>
+
+```bash
+Outputs:
+
+worker_dashboard_url = "https://dash.cloudflare.com/<account_id>/workers/services/view/my-enforcer" # Cloudflare dashboard link for the deployed Worker
+kv_namespace_id      = <sensitive> # KV namespace ID (created or provided) — sensitive
+worker_name          = "my-enforcer" # Name of the deployed Worker
+```
+</Step>
+</Steps>
+
+## Update Enforcer configuration
+
+You can update the Enforcer using the [available configurations](/applications/cloudflare-configuration). To do so:
+
+1. Edit your `terraform.tfvars` file with the appropriate configuration updates.
+2. Run `terraform apply`:
+
+<Note>
+We recommend using `use_prebuilt=true` particularly when changing `enforcer_config`. When set to `false`, the `null_resource` rebuilds `dist/index.js` during `terraform apply` after the plan has already locked the file's SHA-256. This causes a "provider inconsistency" error on the first run and requires a second `terraform apply -var-file="terraform.tfvars"` to complete. Using `use_prebuilt = true` avoids this by separating build from deploy. 
+</Note>
+```bash
+terraform apply \
+    -var="use_prebuilt=true" \
+    -var-file="terraform.tfvars"
+```
+
+Assuming only `enforcer_config` changed, Terraform will:
+1. Rewrite `worker/src/config.json`. Changing the configuration hash always triggers a rebuild.
+2. Re-run the wrangler build
+3. Upload a new Worker version and roll it out at 100%
+
+No manual rebuild or Cloudflare console steps are needed.
+
+## Destroy
+
+To remove all Cloudflare resources managed by this module, run: 
+
+<Note>
+The `worker/dist/` directory and `worker/node_modules/` are local build artifacts and aren't removed by `terraform destroy`. Delete them manually if needed.
+</Note>
+
+```bash
+terraform destroy -var-file="terraform.tfvars"
+```
+
+## Detailed runtime flow
+
+```
+terraform apply
+      │
+      ├─► local_file.enforcer_config
+      │     Writes var.enforcer_config → worker/src/config.json  (sensitive, mode 0600)
+      │
+      ├─► null_resource.build_worker   (skipped if use_prebuilt=true or use_custom_worker=true)
+      │     cd worker/
+      │     npm install
+      │     npx wrangler deploy --dry-run --outdir dist
+      │     → produces worker/dist/index.js
+      │
+      ├─► cloudflare_workers_kv_namespace.enforcer_kv  (skipped if create_kv_namespace=false)
+      │     Creates a new KV namespace titled "PXKV"
+      │
+      ├─► cloudflare_worker.enforcer
+      │     Creates (or updates) the Worker definition with observability enabled
+      │
+      ├─► cloudflare_worker_version.enforcer
+      │     Uploads worker/dist/index.js as a new Worker version
+      │     Attaches the KV namespace binding (PXKV → namespace ID)
+      │     Sets the compatibility date
+      │
+      ├─► cloudflare_workers_deployment.enforcer
+      │     Rolls out the new version at 100% traffic
+      │
+      └─► cloudflare_workers_route.routes  (one per entry in var.routes)
+            Looks up each zone_name → zone_id via data.cloudflare_zone
+            Creates a route that maps the URL pattern to the Worker
+```
+
+On subsequent runs, Terraform only rebuilds and re-uploads what actually changed. The build step is skipped unless `enforcer_config`, a Worker source file (`src/*.ts`), `wrangler.toml`, `tsconfig.json`, `package.json`, or `package-lock.json` has changed (all tracked via SHA-256 triggers).
+
