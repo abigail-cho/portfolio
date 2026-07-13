@@ -57,24 +57,24 @@ The Terraform module uses the following files. Refer to the [detailed file infor
         <Tree.File name="README.md" />
         <Tree.File name=".gitignore" />
         <Tree.Folder name="worker" defaultOpen>
-            <File name="package.json" comment="Depends on @humansecurity/cloudflare-enforcer" />
-            <File name="wrangler.toml" comment="Wrangler build config (main = src/index.ts)" highlighted />
-            <File name="tsconfig.json" comment="TypeScript config with resolveJsonModule: true" />
-            <File name=".gitignore" comment="Excludes node_modules/, dist/, src/config.json" />
-            <Folder name="src" defaultOpen>
-                <File name="index.ts" comment="Worker entrypoint: enforce → fetch → postEnforce" highlighted />
-                <File name="humansecurity.ts" comment="Re-exports @humansecurity/cloudflare-enforcer" highlighted />
-            </Folder>
-        </Folder>
-        <Folder name="examples">
-            <Folder name="basic">
-                <File name="main.tf" comment="Minimal working example calling the module" />
-            </Folder>
-        </Folder>
-    </Folder>
-</Files>
+            <Tree.File name="package.json" />
+            <Tree.File name="wrangler.toml"  />
+            <Tree.File name="tsconfig.json" />
+            <Tree.File name=".gitignore"  />
+            <Tree.Folder name="src" defaultOpen>
+                <Tree.File name="index.ts" />
+                <File name="humansecurity.ts" />
+            </Tree.Folder>
+        </Tree.Folder>
+        <Tree.Folder name="examples">
+            <Tree.Folder name="basic">
+                <Tree.File name="main.tf" />
+            </Tree.Folder>
+        </Tree.Folder>
+    </Tree.Folder>
+</Tree>
 
-<Accordion title="Detailed file information">
+<Expandable title="Detailed file information">
 | File | Purpose |
 |---|---|
 | `versions.tf` | Pins the Cloudflare provider to `~> 5.0` and declares the `null` and `local` providers needed for the build step |
@@ -85,7 +85,7 @@ The Terraform module uses the following files. Refer to the [detailed file infor
 | `worker/src/index.ts` | The actual Worker script that initializes the Enforcer with `config.json` and the `env` (for KV access), then runs the `enforce`/`fetch`/`postEnforce` loop |
 | `worker/src/humansecurity.ts` | Thin re-export of `@humansecurity/cloudflare-enforcer` so the Worker can import it as a local module |
 | `worker/wrangler.toml` | Wrangler build configuration with a placeholder KV namespace ID. The real ID is injected at deploy time through the `cloudflare_worker_version` bindings block, so this placeholder is only used during the dry-run build |
-</Accordion>
+</Expandable>
 
 ## Installation
 
