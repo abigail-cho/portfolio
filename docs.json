@@ -42,7 +42,8 @@
                 "group": "Reference",
                 "pages": [
                   "/product-documentation/about-attack-profiles",
-                  "/product-documentation/understanding-first-party-data"
+                  "/product-documentation/understanding-first-party-data",
+                  "/product-documentation/overview"
                 ]
               }
             ]
@@ -72,7 +73,8 @@
               {
                 "group": "Other developer documentation",
                 "pages":[
-                  "api-reference/install-the-cloudflare-enforcer"
+                  "api-reference/install-the-cloudflare-enforcer",
+                  "api-reference/install-the-cloudflare-enforcer-with-terraform"
                 ]
               }
             ]
